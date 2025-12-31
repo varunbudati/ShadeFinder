@@ -12,6 +12,19 @@ function App() {
   const [lat] = useState(29.3375);
   const [zoom] = useState(15.5);
   const [hour, setHour] = useState(12); // Default to Noon
+  const [climate, setClimate] = useState(null);
+  // Fetch climate info on mount
+  useEffect(() => {
+    const fetchClimate = async () => {
+      try {
+        const res = await axios.get(`http://127.0.0.1:8000/climate?lat=${lat}&lon=${lng}`);
+        setClimate(res.data);
+      } catch (e) {
+        setClimate(null);
+      }
+    };
+    fetchClimate();
+  }, [lat, lng]);
 
   // Add this function to fetch shadows when the hour changes
   const updateShadows = async (newHour) => {
@@ -78,6 +91,17 @@ function App() {
         <h1 style={{ margin: 0, fontSize: '18px' }}>ShadeFinder: Kuwait City</h1>
         <p style={{ margin: 0 }}>Showing real-time building shadows</p>
       </div>
+      {climate && (
+        <div style={{ position: 'absolute', top: 100, left: 10, background: 'rgba(255,255,255,0.9)', padding: '15px', borderRadius: '8px', zIndex: 10 }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>Climate Metrics</h4>
+          <div style={{ fontSize: '14px' }}>
+            <p>🌡️ <b>Temp:</b> {climate.temp}°C</p>
+            <p>💧 <b>Humidity:</b> {climate.humidity}%</p>
+            <p>🌬️ <b>Wind:</b> {climate.wind} m/s</p>
+            <p>☀️ <b>Status:</b> {climate.condition}</p>
+          </div>
+        </div>
+      )}
       <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', background: 'white', padding: '20px', borderRadius: '10px', zIndex: 10 }}>
         <label>Time of Day (Kuwait): {hour}:00</label>
         <input 
